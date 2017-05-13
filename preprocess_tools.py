@@ -1,4 +1,3 @@
-from time import time
 from datetime import datetime
 
 
@@ -12,7 +11,7 @@ def strip(exp_date, type):
             return stripped_date.year
         elif type == "month":
             return stripped_date.month
-        elif type == "year":
+        elif type == "day":
             return stripped_date.day
 
 def date_subtract(date1,date2):
@@ -21,20 +20,20 @@ def date_subtract(date1,date2):
     date_difference = stripped_date2 - stripped_date1
     return date_difference
 
-def strip_other(exp_date, type):
-    stripped_date = datetime.strptime(exp_date, "%Y-%m-%d")
-    if type == "date":
-        return stripped_date.date()
-    elif type == "time":
-        return stripped_date.time()
-    elif type == "year":
-        return stripped_date.year
-    elif type == "month":
-        return stripped_date.month
-    elif type == "year":
-        return stripped_date.day
 
-def adult_per_room(srch_adult_cnt,srch_rm_cnt):
-    adult_per_room = srch_adult_cnt / srch_rm_cnt *1.0
-    return adult_per_room
+def create_month_bins(month):
+    if month <=3:
+        return  1
+    elif month > 3 and month <=6:
+        return  2
+    elif month >6 and month <=9:
+        return 3
+    elif month >9 and month <=12:
+        return 4
+
+def weekend_check(day):
+    if day == 6 or day == 5:
+        return 1
+    else:
+        return 0
 
