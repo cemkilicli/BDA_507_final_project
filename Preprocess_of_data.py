@@ -50,11 +50,17 @@ exp_data["srch_co_is_summer"] = exp_data.apply(lambda row: check_season(row["src
 exp_data["srch_co_is_fall"] = exp_data.apply(lambda row: check_season(row["srch_co_season_bin"],"fall"), axis=1)
 
 exp_data["room_night"] = exp_data.apply(lambda row: date_subtract(row["srch_ci"], row["srch_co"]), axis=1)
+exp_data["room_night"] = exp_data["room_night"]/ np.timedelta64(1, 'D')
 exp_data["adult_per_room"] = (exp_data["srch_adults_cnt"]/exp_data["srch_rm_cnt"])
+
 exp_data["children_per_room"] = (exp_data["srch_children_cnt"]/exp_data["srch_rm_cnt"])
 exp_data["person_per_room"] = ((exp_data["srch_children_cnt"]+exp_data["srch_adults_cnt"])/exp_data["srch_rm_cnt"])
-
 exp_data["event_season_bin"] = exp_data.apply(lambda row: create_month_bins(row["event_month"]), axis=1)
+
+exp_data["adult_per_room"] =  exp_data["adult_per_room"].round(2)
+exp_data["children_per_room"] = exp_data["children_per_room"].round(2)
+exp_data["person_per_room"] = exp_data["person_per_room"].round(2)
+exp_data["event_season_bin"] = exp_data["event_season_bin"].round(2)
 
 exp_data["event_is_winter"] = exp_data.apply(lambda row: check_season(row["event_season_bin"],"winter"), axis=1)
 exp_data["event_is_spring"] = exp_data.apply(lambda row: check_season(row["event_season_bin"],"spring"), axis=1)
@@ -72,8 +78,7 @@ exp_data["evet_is_afternoon"] = exp_data.apply(lambda row: check_time(row["event
 exp_data["evet_is_evening"] = exp_data.apply(lambda row: check_time(row["event_time"],"evening"), axis=1)
 exp_data["evet_is_night"] = exp_data.apply(lambda row: check_time(row["event_time"],"night"), axis=1)
 
-
-
+pd.to_numeric(exp_data["room_night"])
 
 
 feature_labels = ["weekend_event", "event_weekday","event_season"]
@@ -84,7 +89,7 @@ print exp_data.head()
 
 
 # Create tabel variable to pass train_test_split
-exp_data_labels = exp_data.is_booking
+exp_data_labels = exp_data["is_booking"]
 
 # Remove column is_booking and orig_destination_distance from data frame
 df_drop_columns = ["date_time","orig_destination_distance","srch_ci","srch_co","event_date","event_time"]
@@ -98,3 +103,6 @@ print data_train
 
 exp_data_labels.to_csv("clean_sample_labels.csv", index=False, encoding='utf-8',index_label=True,)
 data_train.to_csv("clean_sample.csv", index=False, encoding='utf-8', index_label=True,)
+
+print "labels", exp_data_labels.shape
+print "train data", data_train.shape
