@@ -1,7 +1,4 @@
 
-from sklearn import preprocessing
-from sklearn.model_selection import train_test_split
-
 import numpy as np
 import pandas as pd
 from preprocess_tools import strip
@@ -20,6 +17,7 @@ exp_data["srch_ci"].replace("", np.nan, inplace=True)
 exp_data["srch_co"].replace("", np.nan, inplace=True)
 exp_data = exp_data.dropna(subset=["srch_ci"], how="all")
 exp_data = exp_data.dropna(subset=["srch_co"], how="all")
+
 
 
 #Creating vatiables
@@ -81,7 +79,6 @@ exp_data["evet_is_night"] = exp_data.apply(lambda row: check_time(row["event_tim
 pd.to_numeric(exp_data["room_night"])
 
 
-feature_labels = ["weekend_event", "event_weekday","event_season"]
 
 
 print exp_data.info()
@@ -91,18 +88,19 @@ print exp_data.head()
 # Create tabel variable to pass train_test_split
 exp_data_labels = exp_data["is_booking"]
 
-# Remove column is_booking and orig_destination_distance from data frame
-df_drop_columns = ["date_time","orig_destination_distance","srch_ci","srch_co","event_date","event_time"]
+exp_data = exp_data.dropna(subset=["adult_per_room"], how="all")
+exp_data = exp_data.dropna(subset=["children_per_room"], how="all")
+exp_data = exp_data.dropna(subset=["person_per_room"], how="all")
+
+# Remove column stripped columns from data frame
+df_drop_columns = ["date_time","orig_destination_distance","srch_ci","srch_co","event_date","event_time",]
 
 for i in df_drop_columns:
     data_train = exp_data.drop(df_drop_columns, axis=1)
 
 
-print exp_data_labels
 print data_train
 
-exp_data_labels.to_csv("clean_sample_labels.csv", index=False, encoding='utf-8',index_label=True,)
 data_train.to_csv("clean_sample.csv", index=False, encoding='utf-8', index_label=True,)
 
-print "labels", exp_data_labels.shape
 print "train data", data_train.shape
