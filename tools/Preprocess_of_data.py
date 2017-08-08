@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 from preprocess_tools import strip
@@ -8,10 +7,9 @@ from preprocess_tools import weekend_check
 from preprocess_tools import check_time
 from preprocess_tools import check_season
 from preprocess_tools import strip_srch
-#from cross_validation import cross_validation_sk
 
 
-exp_data = pd.read_csv('./exp_data/sample_mini.csv', delimiter=',')
+exp_data = pd.read_csv('../exp_data/2_sample/exp_data_sample_balanced.csv', delimiter=',')
 
 exp_data["srch_ci"].replace("", np.nan, inplace=True)
 exp_data["srch_co"].replace("", np.nan, inplace=True)
@@ -93,14 +91,18 @@ exp_data = exp_data.dropna(subset=["children_per_room"], how="all")
 exp_data = exp_data.dropna(subset=["person_per_room"], how="all")
 
 # Remove column stripped columns from data frame
-df_drop_columns = ["date_time","orig_destination_distance","srch_ci","srch_co","event_date","event_time",]
+df_drop_columns = ["date_time","srch_ci","srch_co","event_date","event_time",]
+
 
 for i in df_drop_columns:
     data_train = exp_data.drop(df_drop_columns, axis=1)
 
+import os
 
-print data_train
+path=r'/Users/cem.kilicli/Documents/CemKilicliGit/bda507FinalProject/exp_data/3_preprocessed_sample'
 
-data_train.to_csv("clean_sample.csv", index=False, encoding='utf-8', index_label=True,)
+data_train.to_csv(os.path.join(path, r"clean_sample_balanced.csv", index=False, encoding='utf-8', index_label=True,))
 
 print "train data", data_train.shape
+
+

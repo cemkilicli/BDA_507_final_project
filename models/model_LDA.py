@@ -6,7 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #Load clean sample data
-exp_data = pd.read_csv('../exp_data/clean_train.csv', delimiter=',')
+exp_data = pd.read_csv('../exp_data/3_preprocessed_sample/clean_sample_balanced.csv', delimiter=',')
+exp_data = exp_data.drop("orig_destination_distance", axis=1)
 
 #Print data frame information
 print exp_data.info()

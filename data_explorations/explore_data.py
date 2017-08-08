@@ -1,14 +1,17 @@
+import numpy as np
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 # Load Data
-destinations = pd.read_csv("../exp_data/destinations.csv")
-test = pd.read_csv("../exp_data/test.csv")
-train = pd.read_csv("../exp_data/train.csv")
+destinations = pd.read_csv("../exp_data/1_original_data/destinations.csv")
+test = pd.read_csv("../exp_data/1_original_data/test.csv")
+train = pd.read_csv("../exp_data/1_original_data/train.csv")
 
 # Check how much data there is
+print train.info()
 print train.shape
-print test.shape
-print destinations.shape
 
 # Explore the first 5 rows of the train data:
 print train.head(5)
@@ -16,49 +19,89 @@ print train.head(5)
 # Explore the first 5 rows of the test data:
 print train.head(5)
 
-# Exploring hotel clusters
-print train["hotel_cluster"].value_counts()
 
-# Exploring train and test user ids
-# Create a set of all the unique test user & train user ids.
-test_ids = set(test.user_id.unique())
-train_ids = set(train.user_id.unique())
-
-# Check if test user id count match with train user id count
-intersection_count = len(test_ids & train_ids)
-print intersection_count == len(test_ids)
-
-train["date_time"] = pd.to_datetime(train["date_time"])
-train["year"] = train["date_time"].dt.year
-train["month"] = train["date_time"].dt.month
-
-import random
-
-unique_users = train.user_id.unique()
-
-sel_user_id = random.sample(unique_users,10000)
-sel_train = train[train.user_id.isin(sel_user_id)]
-
-t1 = sel_train[((sel_train.year == 2013) | ((sel_train.year == 2014) & (sel_train.month < 8)))]
-t2 = sel_train[((sel_train.year == 2014) & (sel_train.month >= 8))]
-
-t2 = t2[t2.is_booking == True]
-
-most_common_clusters = list(train.hotel_cluster.value_counts().head().index)
-
-predictions = [most_common_clusters for i in range(t2.shape[0])]
-
-import ml_metrics as metrics
-target = [[l] for l in t2["hotel_cluster"]]
-metrics.mapk(target, predictions, k=5)
+# How Much event there is?
+print "plot 1 printed"
+sns.countplot(x='is_booking', data=train).set_title('Booking vs. Clicks')
+plt.show()
 
 
-train.corr()["hotel_cluster"]
+# preferred continent destinations
+print "plot 2 printed"
+sns.countplot(x='hotel_continent', data=train).set_title('Preferred Continent Destinations')
+plt.show()
 
 
-from sklearn.decomposition import PCA
 
-pca = PCA(n_components=3)
-dest_small = pca.fit_transform(destinations[["d{0}".format(i + 1) for i in range(149)]])
-dest_small = pd.DataFrame(dest_small)
-dest_small["srch_destination_id"] = destinations["srch_destination_id"]
+# most of people booking are from continent 3 I guess is one of the rich continent?
+print "plot 3 printed"
+sns.countplot(x='posa_continent', data=train).set_title('posa_continent')
+plt.show()
+
+
+# putting the two above together
+print "plot 4 printed"
+sns.countplot(x='hotel_continent', hue='posa_continent', data=train)
+plt.show()
+
+
+# how many people by continent are booking from mobile
+print "plot 5 printed"
+sns.countplot(x='posa_continent', hue='is_mobile', data = train)
+plt.show()
+
+# Difference between user and destination country
+print "plot 6 printed"
+sns.distplot(train['user_location_country'], label="User country")
+sns.distplot(train['hotel_country'], label="Hotel country")
+plt.legend()
+plt.show()
+
+print "plot 7 printed"
+sns.countplot(x='srch_ci_month', hue='is_booking', data = train)
+plt.legend()
+plt.show()
+
+print "plot 8 printed"
+sns.countplot(x='event_month', hue='is_booking', data = train)
+plt.legend()
+plt.show()
+
+print "plot 9 printed"
+sns.distplot(train['srch_ci_month'], label="Check in Month")
+sns.distplot(train['event_month'], label="Search Month")
+plt.legend()
+plt.show()
+
+
+# get number of booked nights as difference between check in and check out
+print "plot 10 printed"
+hotel_nights = train["room_night"].astype(float) # convert to float to avoid NA problems
+train['hotel_nights'] = hotel_nights
+plt.figure(figsize=(11, 9))
+ax = sns.boxplot(x='hotel_continent', y='hotel_nights', data=train)
+lim = ax.set(ylim=(0, 15))
+
+plt.figure(figsize=(11, 9))
+sns.countplot(x="hotel_nights", data=train)
+plt.show()
+
+
+
+# plot all columns countplots
+print "plot 9 printed"
+rows = train.columns.size//3 - 1
+fig, axes = plt.subplots(nrows=rows, ncols=3, figsize=(12,18))
+fig.tight_layout()
+i = 0
+j = 0
+for col in train.columns:
+    if j >= 3:
+        j = 0
+        i += 1
+    # avoid to plot by date
+    if train[col].dtype == np.int64:
+        sns.countplot(x=col, data=train, ax=axes[i][j])
+        j += 1
+plt.show()
+

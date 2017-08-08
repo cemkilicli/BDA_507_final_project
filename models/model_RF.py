@@ -4,11 +4,13 @@ from sklearn.metrics import confusion_matrix
 import pandas as pd
 from plot import plot_confusion_matrix
 import matplotlib.pyplot as plt
+from sklearn.metrics import log_loss
 
 
 #Load clean sample data
 exp_data = pd.read_csv('../exp_data/3_preprocessed_sample/clean_sample_balanced.csv', delimiter=',')
 exp_data = exp_data.drop("orig_destination_distance", axis=1)
+
 
 #Print data frame information
 print exp_data.info()
@@ -28,6 +30,7 @@ class_names = ["is book", "is not book"]
 
 scale_labels = ["srch_destination_id", "user_location_region", "user_location_city", "user_id"]
 
+
 def scaler_MinMax(scale_labels):
     scaler = MinMaxScaler()
     for name in scale_labels:
@@ -38,6 +41,7 @@ def scaler_MinMax(scale_labels):
 
 scaler_MinMax(scale_labels)
 
+
 drop_labels = ["is_booking"]
 
 for names in drop_labels:
@@ -47,12 +51,18 @@ for names in drop_labels:
 # Create train test split
 features_train, features_test, labels_train, labels_test = train_test_split(exp_data_data, exp_data_labels, test_size=0.25, random_state=42)
 
-#Apply DecsionTree Classifier
-from sklearn import tree
-clf = tree.DecisionTreeClassifier()
+
+from sklearn.ensemble import RandomForestClassifier
+
+# Train uncalibrated random forest classifier on whole train and validation
+# data and evaluate on test data
+clf = RandomForestClassifier(n_estimators=50, class_weight="balanced")
 clf.fit(features_train, labels_train)
 pred = clf.predict(features_test)
-tree.export_graphviz(clf, out_file='tree.png')
+clf_probs = clf.predict_proba(features_test)
+score = log_loss(labels_test, clf_probs)
+
+print score
 
 
 """
@@ -75,12 +85,3 @@ plt.show()
 print "Accuracy is", accuracy_score(labels_test,pred)
 print "The number of correct predictions is", accuracy_score(labels_test, pred, normalize=False)
 print "Total sample used is", len(pred)  # number of all of the predictions
-
-
-
-
-
-
-
-
-
